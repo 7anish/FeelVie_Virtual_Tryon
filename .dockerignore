@@ -1,0 +1,29 @@
+# Local Python environment
+venv/
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Git history (this can be very large)
+.git
+.gitignore
+.github
+
+# Local model weights 
+# (We ignore these because the Dockerfile downloads them directly 
+# to keep the build clean and consistent)
+weights/
+models/
+.cache/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Documentation and IDE settings
+.vscode/
+.idea/
+README.md
+LICENSE
