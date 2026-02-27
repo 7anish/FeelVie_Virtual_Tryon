@@ -11,18 +11,18 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Upgrade pip and force NumPy 1.x (This is the fix)
+# 2. Upgrade pip and HARD PIN NumPy before anything else
 RUN pip3 install --upgrade pip setuptools wheel
-RUN pip3 install "numpy<2.0"
+RUN pip3 install "numpy<2.0.0"
 
-# 3. Install PyTorch and ONNX
+# 3. Install PyTorch and ONNX (precisely for CUDA 12.1)
 RUN pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu121
 RUN pip3 install onnxruntime-gpu==1.17.1 runpod huggingface_hub
 
-# 4. Install VTON
+# 4. Install VTON directly from source
 RUN pip3 install git+https://github.com/fashn-AI/fashn-vton-1.5.git
 
-# 5. Weights and Handler
+# 5. Bake weights and copy handler
 RUN python3 -c "from huggingface_hub import snapshot_download; \
     snapshot_download(repo_id='fashn-ai/fashn-vton-1.5', local_dir='./weights')"
 
