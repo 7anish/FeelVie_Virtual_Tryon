@@ -34,5 +34,6 @@ RUN python3 -c "from huggingface_hub import snapshot_download; \
     snapshot_download(repo_id='fashn-ai/fashn-vton-1.5', local_dir='./weights')"
 
 COPY handler.py /app/handler.py
+RUN chmod +x /app/handler.py
 
 CMD ["python3", "-u", "/app/handler.py"]
