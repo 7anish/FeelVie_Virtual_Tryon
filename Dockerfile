@@ -1,33 +1,27 @@
-FROM nvidia/cuda:12.1.1-cudnn8-devel-ubuntu22.04
+# 1. Switch to the official NVIDIA PyTorch base (highly stable)
+FROM nvcr.io/nvidia/pytorch:23.10-py3
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    PYTHONUNBUFFERED=1 \
-    LD_LIBRARY_PATH=/usr/local/cuda/lib64:${LD_LIBRARY_PATH}
+    PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# 1. Install system dependencies
+# 2. Install essential system vision libraries
 RUN apt-get update && apt-get install -y \
-    python3-pip python3-dev git build-essential \
-    libgl1-mesa-glx libglib2.0-0 libsm6 libxext6 libxrender-dev ffmpeg \
+    git libgl1-mesa-glx libglib2.0-0 ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Force the correct NumPy version BEFORE other installs
-RUN pip3 install --upgrade pip setuptools wheel
-RUN pip3 uninstall -y numpy && pip3 install "numpy<2.0.0"
+# 3. Clean and fix NumPy/ONNX (The core fix)
+RUN pip3 install --upgrade pip
+RUN pip3 uninstall -y numpy onnxruntime onnxruntime-gpu
+RUN pip3 install "numpy<2.0.0"
+RUN pip3 install onnxruntime-gpu==1.17.1
 
-# 3. Install PyTorch 
-RUN pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu121
-
-# 4. Critical: Specific ONNX version for CUDA 12.1
-RUN pip3 uninstall -y onnxruntime onnxruntime-gpu && \
-    pip3 install onnxruntime-gpu==1.17.1
-
-# 5. Install the VTON project and SDKs
+# 4. Install Fashn-VTON and RunPod
 RUN pip3 install runpod huggingface_hub
 RUN pip3 install git+https://github.com/fashn-AI/fashn-vton-1.5.git
 
-# 6. Weights and Handler
+# 5. Bake weights 
 RUN python3 -c "from huggingface_hub import snapshot_download; \
     snapshot_download(repo_id='fashn-ai/fashn-vton-1.5', local_dir='./weights')"
 
